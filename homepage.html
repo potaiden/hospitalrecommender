@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home | HealthRecommend</title>
+    <style>
+        :root {
+            --primary-red: #c8102e;
+            --primary-blue: #0056b3;
+            --secondary-green: #28a745;
+            --dark-text: #2d3436;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+        }
+
+        body { font-family: 'Segoe UI', Roboto, sans-serif; 
+                background: linear-gradient(rgba(244, 247, 246, 0.85), rgba(244, 247, 246, 0.10)), url('/static/hospital_bg.jpg');
+                background-size: cover;
+                background-attachment: fixed;
+                background-position: center;
+                margin: 0; 
+            }
+
+        /* Navbar Styling */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--white); padding: 15px 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .navbar-logo { font-size: 1.4em; text-decoration: none; color: var(--dark-text); }
+        .navbar-logo strong { font-weight: 800; }
+
+        .navbar-links { display: flex; align-items: center; gap: 20px; }
+        .navbar-links a { text-decoration: none; color: #636e72; font-weight: 600; font-size: 0.95em; }
+
+        /* Main Layout Grid */
+        .main-layout {
+            display: grid; grid-template-columns: 1fr 350px;
+            gap: 30px; max-width: 1300px; margin: 40px auto; padding: 0 20px; align-items: start;
+        }
+
+        /* Left Column Content */
+        .content-card {
+            background: var(--white); padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 2.2em; margin-bottom: 10px; }
+        .highlight { color: var(--primary-red); font-weight: 800; }
+        header p { color: #636e72; font-size: 1.1em; }
+
+        /* XAI Insight Box */
+        #dept-insight-box {
+            display: none; 
+            margin: 20px 0; 
+            padding: 18px; 
+            border-radius: 10px; 
+            border-left: 5px solid var(--primary-red); 
+            background: #fffafa; 
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(200, 16, 46, 0.05);
+        }
+
+        #results-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        /* Recommendation Card Styling */
+        .recommendation {
+            background: var(--white); 
+            border: 1px solid #edf2f7; 
+            border-radius: 12px;
+            padding: 20px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: relative; /* For the rank badge */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .recommendation:hover {
+            transform: translateY(-10px); /* Lifts the card up */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15); /* Adds a deeper shadow for depth */
+            border-color: var(--primary-blue); /* Highlights the border */
+            cursor: pointer;
+        }
+
+        .recommendation:hover .rank-badge {
+            background: var(--primary-blue); /* Changes color from red to blue */
+            transform: scale(1.1); /* Makes the badge slightly larger */
+            transition: all 0.3s ease;
+        }
+
+        .recommendation:hover .score-fill {
+            filter: brightness(1.1);
+            transition: all 0.3s ease;
+        }
+
+        /* Rank Badge Indicator */
+        .rank-badge {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            background: var(--primary-red);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+        }
+
+        .recommendation h3 { margin: 10px 0 5px 0; font-size: 1.1em; line-height: 1.3; }
+        .recommendation h3 a { color: var(--primary-blue); text-decoration: none; }
+        
+        .score-bar { background: #edf2f7; border-radius: 20px; height: 20px; margin-top: 10px; overflow: hidden; }
+        .score-fill { background: var(--secondary-green); color: white; text-align: center; line-height: 20px; font-weight: bold; font-size: 0.75em; }
+
+        /* Form Elements */
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark-text); font-size: 0.95em; }
+        textarea, select { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #dfe6e9; border-radius: 8px; box-sizing: border-box; background-color: #fcfcfc; font-size: 16px; }
+        textarea { min-height: 100px; resize: vertical; }
+        
+        button[type="submit"] { background: var(--primary-blue); color: white; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.3s; font-size: 1.1em; }
+        button[type="submit"]:hover { background: #003d80; transform: translateY(-2px); }
+
+        .location-check { display: flex; align-items: center; margin-bottom: 25px; background: #f8f9fa; padding: 12px; border-radius: 8px; }
+        .location-check input { width: 18px; height: 18px; margin-right: 12px; cursor: pointer; }
+
+        /* Sidebar Styling */
+        .sidebar-panel {
+            background: var(--white); padding: 25px; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--primary-blue);
+            position: sticky; top: 20px;
+        }
+        .sidebar-title { font-size: 1.1em; font-weight: 800; margin-bottom: 20px; color: var(--primary-blue); }
+        .history-card { background: #fdf2f2; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--primary-red); }
+        .advice-card { background: #e3f2fd; padding: 15px; border-radius: 10px; font-size: 0.9em; line-height: 1.6; color: #0d47a1; }
+
+        #google_translate_element { margin-bottom: 15px; text-align: right; }
+
+        /* Responsiveness: Stack columns on smaller screens */
+        @media (max-width: 1100px) {
+            #results-container { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 900px) {
+            .main-layout { grid-template-columns: 1fr; }
+            #results-container { grid-template-columns: 1fr; }
+            .sidebar-panel { position: static; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="navbar-logo"><strong>Health</strong>Recommend</a>
+    <div class="navbar-links">
+        <span style="color: #b2bec3; font-size: 0.9em; margin-right: 10px;">
+            {% if current_user.is_authenticated %} {{ current_user.username }} {% else %} Guest {% endif %}
+        </span>
+        {% if current_user.is_authenticated %} <a href="/bookmarks">My Bookmarks</a> {% endif %}
+        <a href="/logout" style="color:var(--primary-red); font-weight: 600;">Logout</a>
+    </div>
+</nav>
+
+<div class="main-layout">
+    <div class="content-card">
+        <div id="google_translate_element"></div>
+        <header>
+            <h1>Healthcare in <span class="highlight">Penang</span>.</h1>
+            <p>Describe your symptoms below to find the specialized providers suits your needs.</p>
+        </header>
+
+        <form id="symptom-form">
+            <label for="symptoms">Describe Symptoms in Detail (Required)</label>
+            <textarea id="symptoms" placeholder="e.g., I have been experiencing sharp lower back pain for two days..." required></textarea>
+            
+            <label for="symptom-select">Quick Select Common Issues (Optional)</label>
+            <select id="symptom-select">
+                <option value="">-- Choose a symptom --</option>
+                <option value="itchy skin rash">Itchy Skin / Rash</option>
+                <option value="chest pain">Chest Pain</option>
+                <option value="broken bone">Bone / Joint Pain</option>
+                <option value="stomach ache">Stomach Ache</option>
+                <option value="child fever">Child Sickness</option>
+                <option value="blurry eye vision">Blurry Vision</option>
+                <option value="sore throat">Sore Throat</option>
+            </select>
+
+            <div class="location-check">
+                <input type="checkbox" id="prioritize-location">
+                <label for="prioritize-location" style="margin-bottom:0; cursor:pointer; color:#636e72; font-weight:400;">Prioritize hospitals near my current location</label>
+            </div>
+            
+            <button type="submit">Analyze & Find Hospital</button>
+        </form>
+
+        <div id="dept-insight-box"></div>
+
+        <div id="results-container"></div>
+    </div>
+
+    <aside class="sidebar-panel">
+        <div class="sidebar-title">🤖 Health Assistant</div>
+        <div id="sidebar-content">
+            {% if 'guest' in session %}
+                <div style="text-align:center; padding:20px;">
+                    <p style="font-size:2em; margin-bottom: 10px;">🔒</p>
+                    <p style="font-weight:bold; font-size: 0.9em;">Member Only Feature</p>
+                    <p style="font-size:0.8em; line-height: 1.4;">Please <a href="/login" style="color:var(--primary-blue)">Login</a> to see your search history.</p>
+                </div>
+            {% else %}
+                <p id="placeholder" style="color: #95a5a6; font-size: 0.9em; line-height: 1.5;">
+                    Welcome, <strong>{{ current_user.username }}</strong>! Describe your symptoms to see personalized insights here.
+                </p>
+            {% endif %}
+        </div>
+            <div id="ranking-logic-outer" style="margin-top: 25px; border-top: 1px solid #eee; display:none;">
+            <div class="sidebar-title" style="color: #856404; font-size: 0.9em; margin-top: 15px;">⚖️ Ranking Explanation</div>
+            <div id="ranking-logic-content"></div>
+        </div>
+
+    </aside>
+</div>
+
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+    function googleTranslateElementInit() { 
+        new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'en,zh-CN', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element'); 
+    }
+
+    const HEALTH_ADVICE = {
+        'Ophthalmology': 'Rest your eyes and avoid bright screens.',
+        'Dermatology': 'Avoid scratching the area. Use mild soap.',
+        'Cardiology': 'Rest immediately. If pain is severe, call 999.',
+        'Orthopedics': 'Follow RICE: Rest, Ice, Compression, Elevation.',
+        'Gastroenterology': 'Stay hydrated. Avoid spicy or oily foods.',
+        'Pediatrics': 'Monitor temperature and ensure hydration.',
+        'ENT (Otolaryngology)': 'Gargle with warm salt water. Use a humidifier.',
+        'Neurology': 'Rest in a quiet, dark room.',
+        'Obstetrics & Gynecology (OB-GYN)': 'Ensure plenty of rest and stay hydrated.',
+        'General Medicine': 'Rest, maintain hydration, and monitor symptoms.'
+    };
+
+    const form = document.getElementById('symptom-form');
+    const resultsContainer = document.getElementById('results-container');
+    const insightBox = document.getElementById('dept-insight-box');
+    const symptomSelect = document.getElementById('symptom-select');
+    const symptomTextarea = document.getElementById('symptoms');
+
+    symptomSelect.addEventListener('change', function() { if(this.value) symptomTextarea.value = this.value; });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const symptoms = symptomTextarea.value;
+        const useLoc = document.getElementById('prioritize-location').checked;
+        resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:#636e72;">Analyzing specialized reviews for you...</p>';
+        insightBox.style.display = 'none';
+
+        if (useLoc && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => getRecs(symptoms, pos.coords.latitude, pos.coords.longitude), () => getRecs(symptoms));
+        } else { getRecs(symptoms); }
+    });
+
+    async function getRecs(symptoms, lat=null, lon=null) {
+        try {
+            const response = await fetch('/symptom_recommend', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ symptoms, lat, lon })
+            });
+            const data = await response.json();
+            resultsContainer.innerHTML = '';
+            
+            if (data.department) {
+                insightBox.style.display = 'block';
+                insightBox.innerHTML = data.matched_keyword 
+                    ? `<span style="color:var(--primary-red); font-weight:900;">XAI INSIGHT:</span> The keyword <strong style="color:var(--primary-blue);">"${data.matched_keyword}"</strong> matched the <strong style="color:var(--primary-red);">${data.department}</strong> department.`
+                    : `<span style="color:var(--primary-red); font-weight:900;">XAI INSIGHT:</span> Routing to <strong style="color:var(--primary-blue);">General Medicine</strong> for consultation.`;
+                updateSidebar(data.department, symptoms);
+            }
+
+            data.recommendations.forEach((rec, index) => {
+                const score = (rec.score * 100).toFixed(1);
+                const b = rec.breakdown;
+                const rank = index + 1; // 1, 2, 3
+                
+                const div = document.createElement('div');
+                div.className = 'recommendation';
+
+                div.onclick = () => { window.location.href = `/hospital/${encodeURIComponent(rec.hospital_name)}`; };
+
+                div.innerHTML = `
+                    <div class="rank-badge">${rank}</div>
+                    <div>
+                        <h3><a href="/hospital/${encodeURIComponent(rec.hospital_name)}">${rec.hospital_name}</a></h3>
+                        <p style="font-size:0.85em; color:#636e72; margin: 5px 0;">⭐ ${rec.avg_rating.toFixed(1)} | 📍 ${rec.distance_km} km</p>
+                        <div class="score-bar"><div class="score-fill" style="width:${score}%">${score}% Match</div></div>
+                    </div>
+                    
+                    <div style="margin-top:15px; padding:10px; background:#f9f9f9; border-radius:8px; font-size:0.75em;">
+                        <p style="margin:0 0 5px 0; line-height:1.4;">
+                            <span style="color:var(--primary-red); font-weight:bold;">XAI BREAKDOWN:</span><br>
+                            Rating: ${b.rating}% | Sentiment: ${b.sentiment}% | Dist: ${b.distance}%
+                        </p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top:5px;">
+                            ${rec.positive_keywords.map(kw => `<span style="background:#e3f2fd; color:#0d47a1; padding:1px 5px; border-radius:3px; border:1px solid #bbdefb; font-size:0.85em;">#${kw}</span>`).join('')}
+                        </div>
+                    </div>`;
+                resultsContainer.appendChild(div);
+            });
+
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+        } catch (error) { console.error("Error fetching recommendations:", error); }
+    }
+
+    function updateSidebar(dept, symptoms) {
+        const sidebar = document.getElementById('sidebar-content');
+        const rankingOuter = document.getElementById('ranking-logic-outer');
+        const rankingContent = document.getElementById('ranking-logic-content');
+        
+        if (sidebar.innerHTML.includes('🔒')) return;
+
+        const useLoc = document.getElementById('prioritize-location').checked;
+        const advice = HEALTH_ADVICE[dept] || HEALTH_ADVICE['General Medicine'];
+        
+        // 1. Prepare Ranking Logic (Independent Block)
+        const rankingText = useLoc 
+            ? "Results are ranked by combining <strong>specialized review quality (70%)</strong> and <strong>proximity to your current location (30%)</strong>."
+            : "Results are ranked based on a weighted average of <strong>Google star ratings</strong> and <strong>sentiment analysis</strong> of reviews matching your symptoms.";
+        
+        // Show the outer block and inject content
+        rankingOuter.style.display = 'block';
+        rankingContent.innerHTML = `
+            <div class="advice-card" style="background: #fff9db; color: #856404; border-left: 4px solid #f1c40f; margin-bottom: 0;">
+                <p style="margin-bottom:0; font-size:0.85em;">${rankingText}</p>
+            </div>`;
+
+        // 2. Update the main Health Assistant content (History & Advice)
+        sidebar.innerHTML = `
+            <div class="history-card">
+                <p style="font-size:0.75em; font-weight:800; color:#e17055; margin:0; text-transform:uppercase;">Recent Search</p>
+                <p style="font-weight:700; font-size:0.9em; margin:5px 0;">"${symptoms.substring(0, 40)}..."</p>
+                <p style="font-size:0.85em; margin:0;">Dept: <strong>${dept}</strong></p>
+            </div>
+            <div class="advice-card">
+                <h4>💡 Home Care Advice</h4>
+                <p>${advice}</p>
+                <p style="font-size:0.7em; font-style:italic; border-top:1px solid rgba(0,0,0,0.05); padding-top:5px;">Always seek professional diagnosis.</p>
+            </div>`;
+    }
+
+    window.addEventListener('load', () => {
+        const s = "{{ current_user.last_symptom if current_user.is_authenticated else '' }}";
+        const d = "{{ current_user.last_dept if current_user.is_authenticated else '' }}";
+        if (s && d && s !== "None" && d !== "None") updateSidebar(d, s);
+    });
+</script>
+</body>
+</html>

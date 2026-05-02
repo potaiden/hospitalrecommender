@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ hospital.name }} | HealthRecommend</title>
+    <style>
+        :root {
+            --primary-red: #c8102e;
+            --primary-blue: #0056b3;
+            --secondary-green: #28a745;
+            --dark-text: #2d3436;
+            --light-bg: #f4f7f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(rgba(244, 247, 246, 0.4), rgba(244, 247, 246, 0.6)), url('/static/hospital_bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            color: var(--dark-text);
+        }
+
+        .navbar {
+            background: var(--white);
+            padding: 15px 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Translate Widget Styling */
+        #google_translate_element {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .detail-card {
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border-top: 5px solid var(--primary-red);
+        }
+
+        .header-section {
+            padding: 40px;
+            background: linear-gradient(to bottom, #fff, #f9f9f9);
+            border-bottom: 1px solid #eee;
+        }
+
+        .title-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 { margin: 0; color: var(--dark-text); font-size: 2.2em; flex: 1; }
+
+        .category-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: var(--primary-blue);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .btn-bookmark-top {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .state-saved { background-color: #ffeaa7; color: #d63031; border: 1px solid #fab1a0; }
+        .state-unsaved { background-color: var(--secondary-green); color: white; }
+        .btn-bookmark-top:hover { transform: translateY(-2px); opacity: 0.9; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 40px;
+        }
+
+        .info-group h3 {
+            font-size: 1em;
+            color: #b2bec3;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .hotline-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        .copy-link {
+            font-size: 0.8em;
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .copy-link:hover { color: var(--primary-red); }
+
+        .insurance-section {
+            grid-column: span 2;
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-top: 1px solid #eee;
+        }
+
+        .insurance-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .insurance-card {
+            background: white;
+            border: 1px solid #dfe6e9;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px; 
+            height: 60px; 
+            transition: transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .insurance-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .insurance-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .badge {
+            background: white;
+            border: 1px solid #dfe6e9;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        @media (max-width: 600px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .insurance-section { grid-column: span 1; }
+            .title-wrapper { flex-direction: column; align-items: flex-start; }
+            .navbar { padding: 15px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" style="text-decoration:none; color:inherit; font-size:1.4em;"><strong>Health</strong>Recommend</a>
+    <a href="/" style="text-decoration:none; color:var(--primary-blue); font-weight:600;">← Back to Search</a>
+</nav>
+
+<div class="container">
+    <!-- Google Translate Element -->
+    <div id="google_translate_element"></div>
+
+    <div class="detail-card">
+        <div class="header-section">
+            <div class="title-wrapper">
+                <h1>{{ hospital.name }}</h1>
+                
+                {% if current_user.is_authenticated %}
+                    <button id="bookmark-btn" 
+                            class="btn-bookmark-top {{ 'state-saved' if is_bookmarked else 'state-unsaved' }}" 
+                            onclick="toggleBookmark('{{ hospital.name }}')">
+                        {{ '★ Bookmarked' if is_bookmarked else '☆ Save to Bookmarks' }}
+                    </button>
+                {% endif %}
+            </div>
+            <span class="category-tag">{{ hospital.category }}</span>
+        </div>
+
+        <div class="content-grid">
+            <div class="info-group">
+                <h3>Contact & Location</h3>
+                <div class="info-item">
+                    <strong>📍 Location:</strong><br>
+                    <span>{{ hospital.location }}</span><br>
+                    <a href="{{ hospital.google_maps_link }}" target="_blank" style="color:var(--primary-blue); font-size:0.9em;">Open in Google Maps</a>
+                </div>
+                
+                <div class="info-item">
+                    <strong>📞 Hotline:</strong><br>
+                    <div class="hotline-wrapper">
+                        <span id="hotline-num" style="font-size: 1.1em; font-weight: 600;">{{ hospital.phone }}</span>
+                        <span class="copy-link" onclick="copyToClipboard('{{ hospital.phone }}', this)">Copy Number</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-group">
+                <h3>Operation Hours</h3>
+                <div class="info-item">
+                    <strong>🕒 Hours:</strong><br>
+                    <span>{{ hospital.hours }}</span>
+                </div>
+                <div class="info-item">
+                    <strong>🗓️ Business Days:</strong><br>
+                    <span>{{ hospital.days }}</span>
+                </div>
+            </div>
+
+            <div class="insurance-section">
+                <h3>Accepted Insurance Panels</h3>
+                <div class="insurance-badges">
+                    {% if hospital.insurance %}
+                        {# Create a mapping dictionary for filenames #}
+                        {% set logo_map = {
+                            'AIA': 'aia.svg',
+                            'AIG': 'aig.svg',
+                            'Allianz': 'allianz.svg',
+                            'Etiqa': 'etiqa.png',
+                            'FWD': 'fwd.svg',
+                            'Generali': 'generali.svg',
+                            'Great Eastern': 'great-eastern.svg',
+                            'HSBC': 'hsbc.svg',
+                            'Liberty Insurance': 'liberty-insurance.jpg',
+                            'Manulife': 'manulife.webp',
+                            'Prudential': 'prudential.png',
+                            'Takaful Ikhlas': 'takaful-ikhlas.png',
+                            'Tokio Marine': 'tokio_marine.png',
+                            'Zurich': 'zurich.svg'
+                        } %}
+
+                        {% for provider in hospital.insurance %}
+                            <div class="insurance-card" title="{{ provider }}">
+                                {% if provider in logo_map %}
+                                    <img src="{{ url_for('static', filename='insurance_images/' + logo_map[provider]) }}" 
+                                        alt="{{ provider }}" 
+                                        class="insurance-logo">
+                                {% else %}
+                                    {# Fallback to text if logo is not found #}
+                                    <span style="font-size: 0.8em; font-weight: bold; text-align: center;">{{ provider }}</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Contact hospital for specific panel information.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Translate Scripts -->
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+    function googleTranslateElementInit() { 
+        new google.translate.TranslateElement({
+            pageLanguage: 'en', 
+            includedLanguages: 'en,zh-CN', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        }, 'google_translate_element'); 
+    }
+
+    async function toggleBookmark(hospitalName) {
+        try {
+            const response = await fetch('/toggle_bookmark', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hospital_name: hospitalName })
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.error);
+            }
+        } catch (e) {
+            console.error("Bookmark error:", e);
+        }
+    }
+
+    function copyToClipboard(text, element) {
+    const cleanNumber = text.replace(/\D/g, '');
+
+    navigator.clipboard.writeText(cleanNumber).then(() => {
+        const originalText = element.innerText;
+        element.innerText = "Copied!";
+        element.style.color = "#28a745"; // Changes to green
+        
+        setTimeout(() => {
+            element.innerText = originalText;
+            element.style.color = "var(--primary-blue)";
+        }, 2000);
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+    });
+}
+</script>
+
+</body>
+</html>

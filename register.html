@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Healthcare Recommender</title>
+    <style>
+        :root {
+            --secondary-green: #28a745;
+            --light-bg: #f4f7f6;
+            --dark-text: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(rgba(244, 247, 246, 0.4), rgba(244, 247, 246, 0.6)), url('/static/hospital_bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Branding style matching welcome page */
+        .logo { 
+            color: var(--dark-text); 
+            font-size: 1.8em; 
+            margin-bottom: 10px; 
+            letter-spacing: -0.5px;
+        }
+        .logo strong { font-weight: 800; }
+
+        h2 { margin-bottom: 25px; color: var(--dark-text); font-weight: 500; font-size: 1.2em; }
+
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #636e72; font-size: 0.9em; }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: var(--secondary-green); outline: none; }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-register { background-color: var(--secondary-green); color: white; }
+        .btn-register:hover { background-color: #1e7e34; }
+
+        .btn-back { 
+            background-color: transparent; 
+            color: #636e72; 
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 25px;
+            font-size: 0.9em;
+            border-bottom: 1px solid transparent;
+        }
+        .btn-back:hover { color: var(--dark-text); border-bottom: 1px solid var(--dark-text); }
+
+        .flash { padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 0.85em; background-color: #fab1a0; color: #c0392b;}
+
+        p { margin-top: 25px; color: #636e72; font-size: 0.9em; }
+        a { color: var(--secondary-green); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="logo"><strong>Health</strong>Recommend</div>
+        <h2>Create Account</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="username">Full Name</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-register">Join Now</button>
+        </form>
+
+        <p>Already have an account? <a href="/login">Log in here</a></p>
+        
+        <a href="/welcome" class="btn-back">← Back to Welcome Page</a>
+    </div>
+
+</body>
+</html>
